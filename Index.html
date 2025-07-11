@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Version Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .software-form {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+
+        .software-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .software-table th, .software-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .software-table th {
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .software-table tr:hover {
+            background: rgba(52, 152, 219, 0.1);
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status.up-to-date {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.update-available {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status.outdated {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.unknown {
+            background: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .export-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            .software-table {
+                font-size: 14px;
+            }
+            
+            .software-table th, .software-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Software Version Tracker</h1>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSoftware">0</div>
+                <div class="stat-label">Total Software</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="upToDate">0</div>
+                <div class="stat-label">Up to Date</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="updatesAvailable">0</div>
+                <div class="stat-label">Updates Available</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="outdatedSoftware">0</div>
+                <div class="stat-label">Outdated</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="showAddForm()">Add Software</button>
+            <button class="btn btn-success" onclick="checkAllUpdates()">Check All Updates</button>
+            <button class="btn btn-warning" onclick="exportData()">Export Data</button>
+            <button class="btn btn-danger" onclick="importData()">Import Data</button>
+        </div>
+
+        <div class="software-form hidden" id="addForm">
+            <h3>Add New Software</h3>
+            <div class="form-group">
+                <label for="softwareName">Software Name</label>
+                <input type="text" id="softwareName" placeholder="e.g., VLC Media Player">
+            </div>
+            <div class="form-group">
+                <label for="currentVersion">Current Version</label>
+                <input type="text" id="currentVersion" placeholder="e.g., 3.0.18">
+            </div>
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category">
+                    <option value="Media">Media</option>
+                    <option value="Development">Development</option>
+                    <option value="Utility">Utility</option>
+                    <option value="Browser">Browser</option>
+                    <option value="Security">Security</option>
+                    <option value="Office">Office</option>
+                    <option value="Graphics">Graphics</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="downloadUrl">Download/Update URL (Optional)</label>
+                <input type="url" id="downloadUrl" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary" onclick="addSoftware()">Add Software</button>
+                <button class="btn btn-danger" onclick="hideAddForm()">Cancel</button>
+            </div>
+        </div>
+
+        <table class="software-table" id="softwareTable">
+            <thead>
+                <tr>
+                    <th>Software Name</th>
+                    <th>Category</th>
+                    <th>Current Version</th>
+                    <th>Latest Version</th>
+                    <th>Status</th>
+                    <th>Last Checked</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="softwareTableBody">
+                <!-- Software entries will be populated here -->
+            </tbody>
+        </table>
+
+        <div class="export-section">
+            <h3>Data Management</h3>
+            <p>Export your software list to CSV or JSON format for backup or sharing with other tools.</p>
+            <input type="file" id="importFile" accept=".json,.csv" style="display: none;" onchange="handleFileImport(event)">
+        </div>
+
+        <div class="last-updated" id="lastUpdated">
+            Last updated: Never
+        </div>
+    </div>
+
+    <script>
+        let softwareList = [];
+        let currentId = 1;
+
+        // Sample data for demonstration
+        const sampleSoftware = [
+            {
+                id: 1,
+                name: "VLC Media Player",
+                category: "Media",
+                currentVersion: "3.0.18",
+                latestVersion: "3.0.20",
+                status: "update-available",
+                lastChecked: new Date().toLocaleDateString(),
+                downloadUrl: "https://www.videolan.org/vlc/"
+            },
+            {
+                id: 2,
+                name: "7-Zip",
+                category: "Utility",
+                currentVersion: "22.01",
+                latestVersion: "22.01",
+                status: "up-to-date",
+                lastChecked: new Date().toLocaleDateString(),
+                downloadUrl: "https://www.7-zip.org/"
+            },
+            {
+                id: 3,
+                name: "Notepad++",
+                category: "Development",
+                currentVersion: "8.4.7",
+                latestVersion: "8.5.8",
+                status: "outdated",
+                lastChecked: new Date().toLocaleDateString(),
+                downloadUrl: "https://notepad-plus-plus.org/"
+            }
+        ];
+
+        // Initialize with sample data
+        softwareList = [...sampleSoftware];
+        currentId = 4;
+
+        function showAddForm() {
+            document.getElementById('addForm').classList.remove('hidden');
+        }
+
+        function hideAddForm() {
+            document.getElementById('addForm').classList.add('hidden');
+            clearForm();
+        }
+
+        function clearForm() {
+            document.getElementById('softwareName').value = '';
+            document.getElementById('currentVersion').value = '';
+            document.getElementById('category').value = 'Media';
+            document.getElementById('downloadUrl').value = '';
+        }
+
+        function addSoftware() {
+            const name = document.getElementById('softwareName').value.trim();
+            const version = document.getElementById('currentVersion').value.trim();
+            const category = document.getElementById('category').value;
+            const downloadUrl = document.getElementById('downloadUrl').value.trim();
+
+            if (!name || !version) {
+                alert('Please fill in software name and current version');
+                return;
+            }
+
+            const software = {
+                id: currentId++,
+                name: name,
+                category: category,
+                currentVersion: version,
+                latestVersion: "Checking...",
+                status: "unknown",
+                lastChecked: "Never",
+                downloadUrl: downloadUrl
+            };
+
+            softwareList.push(software);
+            renderTable();
+            updateStats();
+            hideAddForm();
+            
+            // Simulate checking for updates
+            setTimeout(() => checkSoftwareUpdate(software.id), 1000);
+        }
+
+        function checkSoftwareUpdate(id) {
+            const software = softwareList.find(s => s.id === id);
+            if (!software) return;
+
+            // Simulate API call - in real implementation, this would check actual versions
+            setTimeout(() => {
+                const mockLatestVersions = {
+                    "VLC Media Player": "3.0.20",
+                    "7-Zip": "22.01",
+                    "Notepad++": "8.5.8",
+                    "Firefox": "119.0.1",
+                    "Chrome": "119.0.6045.105"
+                };
+
+                const latestVersion = mockLatestVersions[software.name] || generateRandomVersion();
+                software.latestVersion = latestVersion;
+                software.lastChecked = new Date().toLocaleDateString();
+                software.status = compareVersions(software.currentVersion, latestVersion);
+
+                renderTable();
+                updateStats();
+            }, Math.random() * 2000 + 1000);
+        }
+
+        function generateRandomVersion() {
+            const major = Math.floor(Math.random() * 10) + 1;
+            const minor = Math.floor(Math.random() * 10);
+            const patch = Math.floor(Math.random() * 20);
+            return `${major}.${minor}.${patch}`;
+        }
+
+        function compareVersions(current, latest) {
+            if (current === latest) return "up-to-date";
+            
+            const currentParts = current.split('.').map(Number);
+            const latestParts = latest.split('.').map(Number);
+            
+            for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
+                const currentPart = currentParts[i] || 0;
+                const latestPart = latestParts[i] || 0;
+                
+                if (currentPart < latestPart) {
+                    return currentPart < latestPart - 1 ? "outdated" : "update-available";
+                } else if (currentPart > latestPart) {
+                    return "up-to-date";
+                }
+            }
+            
+            return "up-to-date";
+        }
+
+        function checkAllUpdates() {
+            document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
+            
+            softwareList.forEach(software => {
+                software.latestVersion = "Checking...";
+                software.status = "unknown";
+            });
+            
+            renderTable();
+            
+            softwareList.forEach(software => {
+                setTimeout(() => checkSoftwareUpdate(software.id), Math.random() * 3000);
+            });
+        }
+
+        function deleteSoftware(id) {
+            if (confirm('Are you sure you want to delete this software entry?')) {
+                softwareList = softwareList.filter(s => s.id !== id);
+                renderTable();
+                updateStats();
+            }
+        }
+
+        function openDownload(url) {
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                alert('No download URL provided for this software');
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('softwareTableBody');
+            tbody.innerHTML = '';
+
+            softwareList.forEach(software => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${software.name}</strong></td>
+                    <td>${software.category}</td>
+                    <td>${software.currentVersion}</td>
+                    <td>${software.latestVersion}</td>
+                    <td><span class="status ${software.status}">${formatStatus(software.status)}</span></td>
+                    <td>${software.lastChecked}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-primary btn-small" onclick="checkSoftwareUpdate(${software.id})">Check</button>
+                            <button class="btn btn-success btn-small" onclick="openDownload('${software.downloadUrl}')">Download</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteSoftware(${software.id})">Delete</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function formatStatus(status) {
+            switch(status) {
+                case 'up-to-date': return 'Up to Date';
+                case 'update-available': return 'Update Available';
+                case 'outdated': return 'Outdated';
+                default: return 'Unknown';
+            }
+        }
+
+        function updateStats() {
+            const total = softwareList.length;
+            const upToDate = softwareList.filter(s => s.status === 'up-to-date').length;
+            const updates = softwareList.filter(s => s.status === 'update-available').length;
+            const outdated = softwareList.filter(s => s.status === 'outdated').length;
+
+            document.getElementById('totalSoftware').textContent = total;
+            document.getElementById('upToDate').textContent = upToDate;
+            document.getElementById('updatesAvailable').textContent = updates;
+            document.getElementById('outdatedSoftware').textContent = outdated;
+        }
+
+        function exportData() {
+            const data = {
+                exportDate: new Date().toISOString(),
+                software: softwareList
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `software-tracker-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.software && Array.isArray(data.software)) {
+                        softwareList = data.software;
+                        currentId = Math.max(...softwareList.map(s => s.id)) + 1;
+                        renderTable();
+                        updateStats();
+                        alert('Data imported successfully!');
+                    } else {
+                        alert('Invalid file format');
+                    }
+                } catch (error) {
+                    alert('Error reading file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Initialize the application
+        renderTable();
+        updateStats();
+    </script>
+</body>
+</html>
